@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Position {
     pos_x:i32,
     pos_y:i32

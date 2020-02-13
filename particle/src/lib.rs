@@ -1,4 +1,53 @@
+
 #[allow(dead_code)]
 pub mod participant {
     pub mod particle;
+    pub mod limit_box;
+    use limit_box::Area;
+    pub struct Participant {
+        particle: particle::Particle,
+        c_particle: u32,
+        limits: limit_box::LimitBox
+    }
+
+    impl Participant {
+        pub fn new(pos_x:Option<i32>,pos_y:Option<i32>,sym:Option<char>,
+            c_particle:u32,
+            l_min_x:i32,
+            l_min_y:i32,
+            l_max_x:i32,
+            l_max_y:i32
+            ) -> Participant{
+                Participant{
+                    particle: particle::Particle::new(
+                        if let Some(x) = pos_x {x} else {l_min_x},
+                        if let Some(x) = pos_y {x} else {l_min_y},
+                        if let Some(c) = sym {c} else {'*'}
+                    ),
+                    c_particle: c_particle,
+                    limits: limit_box::LimitBox::new(l_min_x, l_min_y, l_max_x, l_max_y)
+                }
+        }
+
+        pub fn particle_move(&mut self) {
+            let mut par_aux = self.particle;
+            par_aux.par_move();
+            match self.limits.area_point(par_aux.get_pos_x(),par_aux.get_pos_y()){
+                Area::Inside => (),
+                Area::OutSide1 => self.particle.change_to_180(),
+                Area::OutSide2 => self.particle.change_to_270(), 
+                Area::OutSide3 => self.particle.change_to_0(),
+                Area::OutSide4 => self.particle.change_to_90(),
+                Area::OutCorner1 => self.particle.change_to_225(),
+                Area::OutCorner2 => self.particle.change_to_315(),
+                Area::OutCorner3 => self.particle.change_to_45(),
+                Area::OutCorner4 => self.particle.change_to_135()
+            }
+            self.particle.par_move();
+        }
+
+        pub fn get_particle(&self) -> particle::Particle {
+            self.particle
+        }
+    }
 }
