@@ -5,6 +5,7 @@ pub mod participant {
     pub mod limit_box;
     use limit_box::Area;
     use particle::direction::Dir;
+    use rand::distributions::{Distribution, Uniform};
     pub struct Participant {
         particle: particle::Particle,
         c_particle: u32,
@@ -29,17 +30,26 @@ pub mod participant {
                     limits: limit_box::LimitBox::new(l_min_x, l_min_y, l_max_x, l_max_y)
                 }
         }
-
+        
         pub fn particle_move(&mut self) {
             let mut par_aux = self.particle;
             par_aux.par_move();
-            //Cambiar a enum para direcciones
+            let mut rng = rand::thread_rng();
+            let die = Uniform::from(1..3);
             match self.limits.area_point(par_aux.get_pos_x(),par_aux.get_pos_y()){
                 Area::Inside => (),
-                Area::OutSide1 => self.particle.change_to(Dir::D180),
-                Area::OutSide2 => self.particle.change_to(Dir::D270), 
-                Area::OutSide3 => self.particle.change_to(Dir::D0),
-                Area::OutSide4 => self.particle.change_to(Dir::D90),
+                Area::OutSide1 => self.particle.change_to(
+                    match die.sample(&mut rng){0=> Dir::D135, 1=> Dir::D180,  2=>Dir::D225,_ => Dir::D180}
+                ),
+                Area::OutSide2 => self.particle.change_to(
+                    match die.sample(&mut rng){0=> Dir::D45, 1=> Dir::D90,  2=>Dir::D135,_ => Dir::D90}
+                ), 
+                Area::OutSide3 => self.particle.change_to(
+                    match die.sample(&mut rng){0=> Dir::D45, 1=> Dir::D0,  2=>Dir::D315,_ => Dir::D0}
+                ),
+                Area::OutSide4 => self.particle.change_to(
+                    match die.sample(&mut rng){0=> Dir::D135, 1=> Dir::D90,  2=>Dir::D45,_ => Dir::D90}
+                ),
                 Area::OutCorner1 => self.particle.change_to(Dir::D225),
                 Area::OutCorner2 => self.particle.change_to(Dir::D315),
                 Area::OutCorner3 => self.particle.change_to(Dir::D45),
