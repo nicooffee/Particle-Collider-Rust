@@ -4,6 +4,7 @@ pub mod participant {
     pub mod particle;
     pub mod limit_box;
     use limit_box::Area;
+    use particle::direction::Dir;
     pub struct Participant {
         particle: particle::Particle,
         c_particle: u32,
@@ -32,16 +33,17 @@ pub mod participant {
         pub fn particle_move(&mut self) {
             let mut par_aux = self.particle;
             par_aux.par_move();
+            //Cambiar a enum para direcciones
             match self.limits.area_point(par_aux.get_pos_x(),par_aux.get_pos_y()){
                 Area::Inside => (),
-                Area::OutSide1 => self.particle.change_to_180(),
-                Area::OutSide2 => self.particle.change_to_270(), 
-                Area::OutSide3 => self.particle.change_to_0(),
-                Area::OutSide4 => self.particle.change_to_90(),
-                Area::OutCorner1 => self.particle.change_to_225(),
-                Area::OutCorner2 => self.particle.change_to_315(),
-                Area::OutCorner3 => self.particle.change_to_45(),
-                Area::OutCorner4 => self.particle.change_to_135()
+                Area::OutSide1 => self.particle.change_to(Dir::D180),
+                Area::OutSide2 => self.particle.change_to(Dir::D270), 
+                Area::OutSide3 => self.particle.change_to(Dir::D0),
+                Area::OutSide4 => self.particle.change_to(Dir::D90),
+                Area::OutCorner1 => self.particle.change_to(Dir::D225),
+                Area::OutCorner2 => self.particle.change_to(Dir::D315),
+                Area::OutCorner3 => self.particle.change_to(Dir::D45),
+                Area::OutCorner4 => self.particle.change_to(Dir::D135)
             }
             self.particle.par_move();
         }

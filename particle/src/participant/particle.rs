@@ -42,50 +42,10 @@ impl Particle {
     pub fn get_dir(&self) -> Result<u16,&str>{
         self.dir.get_dir()
     }
-
-    pub fn turn_45(&mut self){
-        self.dir.turn_45()
+    pub fn turn(&mut self,dir: direction::Dir){
+        self.dir.turn(dir);
     }
-    pub fn turn_90(&mut self){
-        self.dir.turn_90()
-    }
-    pub fn turn_135(&mut self){
-        self.dir.turn_135()
-    }
-    pub fn turn_180(&mut self){
-        self.dir.turn_180()
-    }
-    pub fn turn_225(&mut self){
-        self.dir.turn_225()
-    }
-    pub fn turn_270(&mut self){
-        self.dir.turn_270()
-    }
-    pub fn turn_315(&mut self){
-        self.dir.turn_315()
-    }
-    pub fn change_to_0(&mut self){
-        self.dir.change_to_0();
-    }
-    pub fn change_to_45(&mut self){
-        self.dir.change_to_45();
-    }
-    pub fn change_to_90(&mut self){
-        self.dir.change_to_90();
-    }
-    pub fn change_to_135(&mut self){
-        self.dir.change_to_135();
-    }
-    pub fn change_to_180(&mut self){
-        self.dir.change_to_180();
-    }
-    pub fn change_to_225(&mut self){
-        self.dir.change_to_225();
-    }
-    pub fn change_to_270(&mut self){
-        self.dir.change_to_270();
-    }
-    pub fn change_to_315(&mut self){
-        self.dir.change_to_315();
+    pub fn change_to(&mut self,dir: direction::Dir){
+        self.dir.change_to(dir);
     }
 }
