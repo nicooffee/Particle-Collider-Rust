@@ -12,7 +12,7 @@ fn main() {
     loop{
         write!(screen,"{}{}",
             cursor::Goto(part.get_pos_x() as u16,part.get_pos_y()as u16),
-            part.get_sym(true)
+            part.get_sym(false)
         ).unwrap();
         screen.flush().unwrap();
         thread::sleep(time::Duration::from_millis(100));
