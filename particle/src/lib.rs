@@ -35,7 +35,7 @@ pub mod participant {
             let mut par_aux = self.particle;
             par_aux.par_move();
             let mut rng = rand::thread_rng();
-            let die = Uniform::from(1..3);
+            let die = Uniform::from(0..3);
             match self.limits.area_point(par_aux.get_pos_x(),par_aux.get_pos_y()).unwrap(){
                 Area::Inside => (),
                 Area::OutSide1 => self.particle.change_to(
