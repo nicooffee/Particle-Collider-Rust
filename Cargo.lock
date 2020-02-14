@@ -44,6 +44,7 @@ version = "0.1.0"
 dependencies = [
  "participant_lib",
  "termion",
+ "termion_ext",
 ]
 
 [[package]]
@@ -125,6 +126,14 @@ dependencies = [
  "numtoa",
  "redox_syscall",
  "redox_termios",
+]
+
+[[package]]
+name = "termion_ext"
+version = "0.1.0"
+source = "git+https://github.com/nicooffee/termion-ext#a2a9150250a513e3badcf1350c9f18b1b05b9c53"
+dependencies = [
+ "termion",
 ]
 
 [[package]]

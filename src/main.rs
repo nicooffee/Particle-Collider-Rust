@@ -5,15 +5,16 @@ use std::io::{Read, Write, stdout};
 use termion::{cursor, clear};
 use termion::raw::IntoRawMode;
 use termion::async_stdin;
-
+use termion_ext::AdvWrite;
 
 
 fn main() {
     let mut s_in = async_stdin().bytes();
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let (max_x,max_y):(u16,u16) = termion::terminal_size().unwrap();
-    let mut part = participant::Participant::new(Some(5),None,None,1,1,3,max_x as i32,max_y as i32);
+    let mut part = participant::Participant::new(None,None,None,2,2,3,max_x as i32-1,max_y as i32-1);
     write!(s_out,"{}{}",clear::All,cursor::Hide).unwrap();
+    s_out.w_box(1,2,max_x,max_y,'*');
     loop{
         let b = s_in.next();
         if let Some(Ok(b'q')) = b {
@@ -23,7 +24,7 @@ fn main() {
         write!(s_out,"{}{}{}",
             cursor::Goto(1,1),
             clear::CurrentLine,
-            format!("max: {} {} Pos particle x:{} y:{} dir: {} {}",max_x,max_y,
+            format!("max: {} {} Pos particle x:{:3} y:{:3}\tdir: {} {:?}",max_x,max_y,
                 particle.get_pos_x(),
                 particle.get_pos_y(),
                 particle.get_sym(true),

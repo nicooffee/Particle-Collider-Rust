@@ -39,7 +39,7 @@ impl Particle {
             true => self.dir.get_dir_as_symbol()
         }
     }
-    pub fn get_dir(&self) -> Result<u16,&str>{
+    pub fn get_dir(&self) -> Result<direction::Dir,&str>{
         self.dir.get_dir()
     }
     pub fn turn(&mut self,dir: direction::Dir){

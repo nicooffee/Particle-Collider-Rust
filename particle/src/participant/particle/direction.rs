@@ -3,6 +3,7 @@ pub struct Direction {
     dir_x: i8,
     dir_y: i8
 }
+#[derive(Debug)]
 pub enum Dir{
     D0,
     D45,
@@ -13,6 +14,7 @@ pub enum Dir{
     D270,
     D315
 }
+
 impl Direction {
     pub fn new() -> Direction{
         Direction{
@@ -20,16 +22,16 @@ impl Direction {
             dir_y: 0
         }
     }
-    pub fn get_dir(&self) -> Result<u16,&str>{
+    pub fn get_dir(&self) -> Result<Dir,&str>{
         match self{
-            Direction{dir_x:1,dir_y:0}      => Ok(0),
-            Direction{dir_x:1,dir_y:-1}     => Ok(45),
-            Direction{dir_x:0,dir_y:-1}     => Ok(90),
-            Direction{dir_x:-1,dir_y:-1}    => Ok(135),
-            Direction{dir_x:-1,dir_y:0}     => Ok(180),
-            Direction{dir_x:-1,dir_y:1}     => Ok(225),
-            Direction{dir_x:0,dir_y:1}      => Ok(270),
-            Direction{dir_x:1,dir_y:1}      => Ok(315),
+            Direction{dir_x:1,dir_y:0}      => Ok(Dir::D0),
+            Direction{dir_x:1,dir_y:-1}     => Ok(Dir::D45),
+            Direction{dir_x:0,dir_y:-1}     => Ok(Dir::D90),
+            Direction{dir_x:-1,dir_y:-1}    => Ok(Dir::D135),
+            Direction{dir_x:-1,dir_y:0}     => Ok(Dir::D180),
+            Direction{dir_x:-1,dir_y:1}     => Ok(Dir::D225),
+            Direction{dir_x:0,dir_y:1}      => Ok(Dir::D270),
+            Direction{dir_x:1,dir_y:1}      => Ok(Dir::D315),
             _ => Err("Direccion no definida")
         }
     }
