@@ -131,7 +131,7 @@ dependencies = [
 [[package]]
 name = "termion_ext"
 version = "0.1.0"
-source = "git+https://github.com/nicooffee/termion-ext#a2a9150250a513e3badcf1350c9f18b1b05b9c53"
+source = "git+https://github.com/nicooffee/termion-ext#a7a874d1dff1e2294f2ffb702697d690e365744e"
 dependencies = [
  "termion",
 ]

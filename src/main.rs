@@ -14,7 +14,7 @@ fn main() {
     let (max_x,max_y):(u16,u16) = termion::terminal_size().unwrap();
     let mut part = participant::Participant::new(None,None,None,2,2,3,max_x as i32-1,max_y as i32-1);
     write!(s_out,"{}{}",clear::All,cursor::Hide).unwrap();
-    s_out.w_box(1,2,max_x,max_y,'*');
+    s_out.w_box(1,2,max_x,max_y,None,None);
     loop{
         let b = s_in.next();
         if let Some(Ok(b'q')) = b {
