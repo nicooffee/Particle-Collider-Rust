@@ -2,7 +2,7 @@ use participant_lib::participant;
 use termion::screen::AlternateScreen;
 use std::{thread, time};
 use std::io::{Read, Write, stdout};
-use termion::{cursor, clear};
+use termion::{cursor, clear,color};
 use termion::raw::IntoRawMode;
 use termion::async_stdin;
 use termion_ext::AdvWrite;
@@ -21,20 +21,23 @@ fn main() {
             break;
         }
         let particle = part.get_particle();
-        write!(s_out,"{}{}{}",
-            cursor::Goto(1,1),
-            clear::CurrentLine,
+        write!(s_out,"{}{}",cursor::Goto(1,1),clear::CurrentLine,).unwrap();
+        s_out.w_go_str(
+            1,1,
             format!("max: {} {} Pos particle x:{:3} y:{:3}\tdir: {} {:?}",max_x,max_y,
                 particle.get_pos_x(),
                 particle.get_pos_y(),
                 particle.get_sym(true),
                 particle.get_dir().unwrap()
             )
-        ).unwrap();
-        write!(s_out,"{}{}",
-            cursor::Goto(particle.get_pos_x() as u16,particle.get_pos_y()as u16),
-            particle.get_sym(false)
-        ).unwrap();
+        );
+        s_out.w_go_str_color(
+            particle.get_pos_x() as u16,
+            particle.get_pos_y()as u16,
+            particle.get_sym(true).to_string(),
+            color::Red,
+            color::Black
+        );
         s_out.flush().unwrap();
         thread::sleep(time::Duration::from_millis(10));
         write!(s_out,"{}{}",
