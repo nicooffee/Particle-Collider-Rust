@@ -36,7 +36,7 @@ fn main() {
             particle.get_pos_y()as u16,
             particle.get_sym(true).to_string(),
             color::Red,
-            color::Black
+            color::Reset
         );
         s_out.flush().unwrap();
         thread::sleep(time::Duration::from_millis(10));
