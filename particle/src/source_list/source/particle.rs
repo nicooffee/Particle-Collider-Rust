@@ -22,11 +22,17 @@ impl Particle {
         self.pos.set_pos_y(self.pos.get_pos_y() + dir_y as i32);
     }
 
+    pub fn comp_particle(&self, particle: Particle) -> bool {
+        self.pos.comp(*particle.get_pos())
+    }
+
     pub fn par_set_pos(&mut self,pos:position::Position){
         self.pos.set_pos_x(pos.get_pos_x());
         self.pos.set_pos_y(pos.get_pos_y());
     }
-
+    pub fn get_pos(&self) -> &position::Position {
+        &self.pos
+    }
     pub fn get_pos_x(&self) -> i32{
         self.pos.get_pos_x()
     }

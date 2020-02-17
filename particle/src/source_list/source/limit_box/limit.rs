@@ -1,3 +1,4 @@
+#[derive(Copy, Clone)]
 pub struct Limit{
     lim_x: i32,
     lim_y: i32
@@ -21,10 +22,10 @@ impl Limit {
         func(self.lim_x,pos_x) && func(self.lim_y,pos_y)
     }
 
-    pub fn get_min_x(&self) -> i32 {
+    pub fn get_x(&self) -> i32 {
         self.lim_x
     }
-    pub fn get_min_y(&self) -> i32 {
+    pub fn get_y(&self) -> i32 {
         self.lim_y
     }
 }

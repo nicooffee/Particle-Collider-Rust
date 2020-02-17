@@ -11,6 +11,9 @@ impl Position {
             pos_y : pos_y
         }
     }
+    pub fn comp(&self, pos: Position) -> bool {
+        self.pos_x == pos.get_pos_x() && self.pos_y == pos.get_pos_y()
+    }
     pub fn get_pos_x(&self) -> i32{
         self.pos_x
     }

@@ -1,3 +1,4 @@
+use rand::distributions::{Distribution, Uniform};
 #[derive(Copy, Clone)]
 pub struct Direction {
     dir_x: i8,
@@ -13,6 +14,24 @@ pub enum Dir{
     D225,
     D270,
     D315
+}
+
+impl Dir {
+    pub fn rand() -> Dir {
+        let mut rng = rand::thread_rng();
+        let uni = Uniform::from(0..8);
+        match uni.sample(&mut rng) {
+            0 => Dir::D0,
+            1 => Dir::D45,
+            2 => Dir::D90,
+            3 => Dir::D135,
+            4 => Dir::D180,
+            5 => Dir::D225,
+            6 => Dir::D270,
+            7 => Dir::D315,
+            _ => panic!()
+        }
+    }
 }
 
 impl Direction {
