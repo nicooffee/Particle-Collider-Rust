@@ -42,7 +42,6 @@ pub mod source_list{
             root.chars().map(|x| {
                 exp = exp/26;
                 let r: u8 = (c_src / exp) as u8;
-                println!("c_src:{} exp:{} r:{}",c_src,exp,r);
                 let new_c = ( x as u8 + r) as char;
                 if r>0 {c_src=c_src-exp*(r as u32)}
                 new_c
