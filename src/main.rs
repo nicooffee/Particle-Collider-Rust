@@ -25,22 +25,19 @@ fn main() {
         }
         for i in 0..source_list.get_len_active(){
             {
-                let s = source_list.get_source(i);
-                s_out.w_go_str(
-                    s.get_particle().get_pos_x() as u16,
-                    s.get_particle().get_pos_y() as u16,
-                    String::from(" ")
+                let pos = source_list.get_source(i).get_position();
+                s_out.w_go_str(pos.get_pos_x() as u16,pos.get_pos_y() as u16,String::from(" ")
                 );
             }
             if let Some((_,pos)) = source_list.move_particle(i){
                 s_out.w_go_str(pos.get_pos_x() as u16,pos.get_pos_y() as u16,String::from("💥"))
             }
             {
-                let s = source_list.get_source(i);
+                let pos = source_list.get_source(i).get_position();
                 s_out.w_go_str(
-                    s.get_particle().get_pos_x() as u16,
-                    s.get_particle().get_pos_y() as u16,
-                    s.get_particle().get_sym(true).to_string()
+                    pos.get_pos_x() as u16,
+                    pos.get_pos_y() as u16,
+                    source_list.get_source(i).get_symbol(true).to_string()
                 );
             }
         }

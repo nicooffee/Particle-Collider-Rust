@@ -35,9 +35,9 @@ pub mod source_list{
         }
 
 
-        pub fn move_particle(&mut self, id_source: usize) -> Option<(Source,Position)> {
+        pub fn move_particle(&mut self, id_source: usize) -> Option<(&Source,Position)> {
             if id_source < self.get_len_active(){
-                let &pos = self.list_active[id_source].get_particle().get_pos();
+                let &pos = self.list_active[id_source].get_position();
                 self.list_active[id_source].particle_move();
                 match (self).get_collision(id_source) {
                     Some(x) => {
@@ -52,7 +52,7 @@ pub mod source_list{
                             self.list_active[x].set_rand_pos();
                         }
                         self.list_active[x].sub_particle();
-                        Some((self.list_active[x],pos))
+                        Some((&self.list_active[x],pos))
                     },
                     None => None
                 }
@@ -66,7 +66,7 @@ pub mod source_list{
         pub fn get_collision(&self,id: usize) -> Option<usize> {
             let mut coll = None;
             for i in 0..self.get_len_active(){
-                if self.list_active[id].get_particle().comp_particle(self.list_active[i].get_particle()) &&
+                if self.list_active[id].comp_particle(&self.list_active[i]) &&
                     id != i
                     {
                         coll = Some(i);
@@ -84,8 +84,9 @@ pub mod source_list{
             self.list_nactive.len()
         }
 
-        pub fn get_source(&self,i: usize) -> Source {
-            self.list_active[i]
+        pub fn get_source(&self,i: usize) -> &Source {
+            &self.list_active[i]
         }
+
     }
 }

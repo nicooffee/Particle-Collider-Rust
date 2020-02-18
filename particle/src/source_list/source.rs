@@ -3,7 +3,7 @@ pub mod limit_box;
 use limit_box::Area;
 use particle::direction::Dir;
 use rand::distributions::{Distribution, Uniform};
-#[derive(Copy,Clone)]
+
 pub struct Source {
     particle: particle::Particle,
     c_particle: u32,
@@ -63,14 +63,22 @@ impl Source {
         self.c_particle
     }
 
-    pub fn get_particle(&self) -> particle::Particle {
-        self.particle
-    }
-
     pub fn set_rand_pos(&mut self) {
         let (pos_x,pos_y) = self.limits.get_rand_cord();
         let n_dir: Dir = Dir::rand();
         self.particle.par_set_pos(particle::position::Position::new(pos_x,pos_y));
         self.particle.change_to(n_dir);
+    }
+
+    pub fn comp_particle(&self, source: &Source) -> bool {
+        self.particle.comp_particle(source.particle)
+    }
+
+    pub fn get_symbol(&self,as_direction: bool) -> char {
+        self.particle.get_symbol(as_direction)
+    }
+
+    pub fn get_position(&self) -> &particle::position::Position {
+        self.particle.get_position()
     }
 }

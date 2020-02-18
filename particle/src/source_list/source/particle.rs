@@ -23,14 +23,14 @@ impl Particle {
     }
 
     pub fn comp_particle(&self, particle: Particle) -> bool {
-        self.pos.comp(*particle.get_pos())
+        self.pos.comp(*particle.get_position())
     }
 
     pub fn par_set_pos(&mut self,pos:position::Position){
         self.pos.set_pos_x(pos.get_pos_x());
         self.pos.set_pos_y(pos.get_pos_y());
     }
-    pub fn get_pos(&self) -> &position::Position {
+    pub fn get_position(&self) -> &position::Position {
         &self.pos
     }
     pub fn get_pos_x(&self) -> i32{
@@ -39,7 +39,7 @@ impl Particle {
     pub fn get_pos_y(&self) -> i32{
         self.pos.get_pos_y()
     }
-    pub fn get_sym(&self,as_direction: bool) -> char {
+    pub fn get_symbol(&self,as_direction: bool) -> char {
         match as_direction{
             false => self.sym,
             true => self.dir.get_dir_as_symbol()
