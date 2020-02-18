@@ -81,4 +81,7 @@ impl Source {
     pub fn get_position(&self) -> &particle::position::Position {
         self.particle.get_position()
     }
+    pub fn get_prev_position(&self) -> &particle::position::Position {
+        self.particle.get_prev_position()
+    }
 }

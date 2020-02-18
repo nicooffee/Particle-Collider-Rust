@@ -1,5 +1,6 @@
 use participant_lib::source_list::SourceList;
 use participant_lib::source_list::source::limit_box::LimitBox;
+use participant_lib::source_list::source::particle::position::Position;
 use termion::screen::AlternateScreen;
 use std::{thread, time};
 use std::io::{Read, Write, stdout};
@@ -24,21 +25,21 @@ fn main() {
             break;
         }
         for i in 0..source_list.get_len_active(){
-            {
-                let pos = source_list.get_source(i).get_position();
-                s_out.w_go_str(pos.get_pos_x() as u16,pos.get_pos_y() as u16,String::from(" ")
-                );
+            let opt = source_list.move_particle(i);
+            let mut opt_col = None::<Position>;
+            if let Some((coll,pos)) = opt {
+                let p = coll.get_position();
+                s_out.w_go_str(p.get_pos_x()as u16,p.get_pos_y()as u16,String::from(" "));
+                opt_col = Some(pos);
             }
-            if let Some((_,pos)) = source_list.move_particle(i){
-                s_out.w_go_str(pos.get_pos_x() as u16,pos.get_pos_y() as u16,String::from("💥"))
-            }
-            {
-                let pos = source_list.get_source(i).get_position();
-                s_out.w_go_str(
-                    pos.get_pos_x() as u16,
-                    pos.get_pos_y() as u16,
-                    source_list.get_source(i).get_symbol(true).to_string()
-                );
+            let src = source_list.get_source(i);
+            let p_src = src.get_position();
+            let p_prev_src = src.get_prev_position();
+            s_out.w_go_str(p_prev_src.get_pos_x()as u16,p_prev_src.get_pos_y()as u16,String::from(" "));
+            s_out.w_go_str(p_src.get_pos_x()as u16,p_src.get_pos_y()as u16,src.get_symbol(true).to_string());
+            if let Some(pos_col) = opt_col{
+                s_out.w_go_str(pos_col.get_pos_x()as u16,pos_col.get_pos_y()as u16,String::from("💥"));
+            
             }
         }
         s_out.flush().unwrap();
