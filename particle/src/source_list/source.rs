@@ -5,13 +5,14 @@ use particle::direction::Dir;
 use rand::distributions::{Distribution, Uniform};
 
 pub struct Source {
+    id: String,
     particle: particle::Particle,
     c_particle: u32,
     limits: limit_box::LimitBox
 }
 
 impl Source {
-    pub fn new(pos_x:Option<i32>,pos_y:Option<i32>,sym:Option<char>,
+    pub fn new(id: String,pos_x:Option<i32>,pos_y:Option<i32>,sym:Option<char>,
         c_particle:u32,
         l_min_x:i32,
         l_min_y:i32,
@@ -19,6 +20,7 @@ impl Source {
         l_max_y:i32
         ) -> Source{
             Source{
+                id: id,
                 particle: particle::Particle::new(
                     if let Some(x) = pos_x {x} else {l_min_x},
                     if let Some(x) = pos_y {x} else {l_min_y},
@@ -72,6 +74,10 @@ impl Source {
 
     pub fn comp_particle(&self, source: &Source) -> bool {
         self.particle.comp_particle(source.particle)
+    }
+
+    pub fn get_id(&self) -> String {
+        self.id.clone()
     }
 
     pub fn get_symbol(&self,as_direction: bool) -> char {

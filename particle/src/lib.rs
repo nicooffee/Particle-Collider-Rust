@@ -17,6 +17,7 @@ pub mod source_list{
                 let (pos_x,pos_y) = area.get_rand_cord();
                 list.push(
                     Source::new(
+                        SourceList::gen_id(list.len() as u32),
                         Some(pos_x), 
                         Some(pos_y), 
                         None, 
@@ -34,6 +35,19 @@ pub mod source_list{
             }
         }
 
+        fn gen_id(c_src: u32) -> String {
+            let root =  String::from("AAAA");
+            let mut exp:u32 = 26u32.pow(root.len() as u32);
+            let mut c_src = c_src;
+            root.chars().map(|x| {
+                exp = exp/26;
+                let r: u8 = (c_src / exp) as u8;
+                println!("c_src:{} exp:{} r:{}",c_src,exp,r);
+                let new_c = ( x as u8 + r) as char;
+                if r>0 {c_src=c_src-exp*(r as u32)}
+                new_c
+            }).collect()
+        }
 
         pub fn move_particle(&mut self, id_source: usize) -> Option<(&Source,Position)> {
             if id_source < self.get_len_active(){
@@ -43,7 +57,6 @@ pub mod source_list{
                     Some(x) => {
                         self.list_active[id_source].set_rand_pos();
                         while let Some(_) = self.get_collision(id_source){
-                            
                             self.list_active[id_source].set_rand_pos();
                         }
                         self.list_active[id_source].sub_particle();
@@ -89,4 +102,19 @@ pub mod source_list{
         }
 
     }
+
+    #[cfg(test)]
+    mod tests {
+        use super::SourceList;
+
+        #[test]
+        fn id() {
+            assert_eq!(String::from("AAAC"),SourceList::gen_id(2));
+            assert_eq!(String::from("AABA"),SourceList::gen_id(26));
+            assert_eq!(String::from("ABAA"),SourceList::gen_id(676));
+            assert_eq!(String::from("BAAA"),SourceList::gen_id(17576));
+            assert_eq!(String::from("ZZZZ"),SourceList::gen_id(456975));
+        }
+    }
 }
+
