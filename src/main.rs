@@ -4,7 +4,7 @@ use participant_lib::source_list::source::particle::position::Position;
 use termion::screen::AlternateScreen;
 use std::{thread, time};
 use std::io::{Read, Write, stdout};
-use termion::{cursor, clear,color};
+use termion::{cursor, clear};
 use termion::raw::IntoRawMode;
 use termion::async_stdin;
 use termion_ext::AdvWrite;
@@ -17,7 +17,7 @@ fn main() {
     write!(s_out,"{}{}",clear::All,cursor::Hide).unwrap();
     s_out.w_box(1,2,max_x,max_y,None,None);
     s_out.flush().unwrap();
-    let mut source_list = SourceList::new(4,5,LimitBox::new(2,3,max_x as i32 -1,max_y as i32 -1));
+    let mut source_list = SourceList::new(3,1,LimitBox::new(2,3,max_x as i32 -1,max_y as i32 -1));
     let mut it = 1;
     let mut c_col = 0;
     loop{
@@ -44,15 +44,17 @@ fn main() {
                 opt_col = Some(pos);
                 c_col = c_col + 1;
             }
-            let src = source_list.get_source(i);
-            let p_src = src.get_position();
-            let p_prev_src = src.get_prev_position();
-            s_out.w_go_str(p_prev_src.get_pos_x()as u16,p_prev_src.get_pos_y()as u16,String::from(" "));
-            s_out.w_go_str(p_src.get_pos_x()as u16,p_src.get_pos_y()as u16,src.get_symbol(true).to_string());
-            if let Some(pos_col) = opt_col{
-                s_out.w_go_str(pos_col.get_pos_x()as u16,pos_col.get_pos_y()as u16,String::from("💥"));
+            if let Some(src) = source_list.get_source_act(i){
+                let p_src = src.get_position();
+                let p_prev_src = src.get_prev_position();
+                s_out.w_go_str(p_prev_src.get_pos_x()as u16,p_prev_src.get_pos_y()as u16,String::from(" "));
+                s_out.w_go_str(p_src.get_pos_x()as u16,p_src.get_pos_y()as u16,src.get_symbol(true).to_string());
+                if let Some(pos_col) = opt_col{
+                    s_out.w_go_str(pos_col.get_pos_x()as u16,pos_col.get_pos_y()as u16,String::from("💥"));
+                }
+                it = it + 1;
             }
-            it = it + 1;
+            
         }
         s_out.flush().unwrap();
         thread::sleep(time::Duration::from_millis(10));

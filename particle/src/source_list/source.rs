@@ -90,4 +90,7 @@ impl Source {
     pub fn get_prev_position(&self) -> &particle::position::Position {
         self.particle.get_prev_position()
     }
+    pub fn get_c_particle(&self) -> u32 {
+        self.c_particle
+    }
 }
