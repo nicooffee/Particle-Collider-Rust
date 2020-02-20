@@ -8,3 +8,5 @@ edition = "2018"
 
 [dependencies]
 rand = "0.7.3"
+termion = "*"
+termion_ext = {git = 'https://github.com/nicooffee/termion-ext'}

@@ -52,6 +52,8 @@ name = "participant_lib"
 version = "0.1.0"
 dependencies = [
  "rand",
+ "termion",
+ "termion_ext",
 ]
 
 [[package]]

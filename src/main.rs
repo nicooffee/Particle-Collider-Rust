@@ -45,10 +45,7 @@ fn main() {
                 c_col = c_col + 1;
             }
             if let Some(src) = source_list.get_source_act(i){
-                let p_src = src.get_position();
-                let p_prev_src = src.get_prev_position();
-                s_out.w_go_str(p_prev_src.get_pos_x()as u16,p_prev_src.get_pos_y()as u16,String::from(" "));
-                s_out.w_go_str(p_src.get_pos_x()as u16,p_src.get_pos_y()as u16,src.get_symbol(true).to_string());
+                src.particle_print(&mut s_out,true);
                 if let Some(pos_col) = opt_col{
                     s_out.w_go_str(pos_col.get_pos_x()as u16,pos_col.get_pos_y()as u16,String::from("💥"));
                 }

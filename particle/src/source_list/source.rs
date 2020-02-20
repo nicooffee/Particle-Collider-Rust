@@ -1,12 +1,14 @@
 pub mod particle;
 pub mod limit_box;
 use limit_box::Area;
+use particle::Particle;
 use particle::direction::Dir;
 use rand::distributions::{Distribution, Uniform};
+use termion::screen::AlternateScreen;
 
 pub struct Source {
     id: String,
-    particle: particle::Particle,
+    particle: particle::GenericParticle,
     c_particle: u32,
     limits: limit_box::LimitBox
 }
@@ -21,7 +23,7 @@ impl Source {
         ) -> Source{
             Source{
                 id: id,
-                particle: particle::Particle::new(
+                particle: particle::GenericParticle::new(
                     if let Some(x) = pos_x {x} else {l_min_x},
                     if let Some(x) = pos_y {x} else {l_min_y},
                     if let Some(c) = sym {c} else {'*'}
@@ -56,6 +58,10 @@ impl Source {
             Area::OutCorner4 => self.particle.change_to(Dir::D135)
         }
         self.particle.par_move();
+    }
+
+    pub fn particle_print<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>,as_dir: bool){
+        self.particle.par_print(srn,as_dir);
     }
 
     pub fn sub_particle(&mut self) -> u32 {
