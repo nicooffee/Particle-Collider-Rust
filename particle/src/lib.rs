@@ -11,7 +11,7 @@ pub mod source_list{
     }
 
     impl SourceList {
-        pub fn new(cant_source: u32, cant_particle: u32, area: LimitBox) -> SourceList {
+        pub fn new(cant_source: usize, cant_particle: u32, area: LimitBox) -> SourceList {
             let mut list:Vec<Source> = Vec::new();
             for _ in 0..cant_source{
                 let (pos_x,pos_y) = area.get_rand_cord();
@@ -103,9 +103,15 @@ pub mod source_list{
             self.list_nactive.len()
         }
 
-        pub fn get_source_act(&self,i: usize) -> Option<&Source> {
+        pub fn get_source_act(&mut self,i: usize) -> Option<&Source> {
             if self.get_len_active()>i{
-                Some(&self.list_active[i])
+                if self.list_active[i].get_c_particle() > 0 {
+                    Some(&self.list_active[i])
+                }
+                else{
+                    self.list_nactive.push(self.list_active.remove(i));
+                    None
+                }
             }
             else {
                 None
