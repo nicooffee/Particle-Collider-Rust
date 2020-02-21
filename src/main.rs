@@ -11,10 +11,10 @@ use termion_ext::AdvWrite;
 
 const CANT_SOURCE: usize      = 5;
 const CANT_PARTICLE: u32    = 2;
-
+const DELAY:u64 = 20;
 
 fn main() {
-    let mut s_in = async_stdin().bytes();
+    let s_in = async_stdin().bytes();
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let (max_x,max_y):(u16,u16) = termion::terminal_size().unwrap();
     write!(s_out,"{}{}",clear::All,cursor::Hide).unwrap();
@@ -32,24 +32,12 @@ fn main() {
             thread::spawn({
                     let clone_src_list  = Arc::clone(&share_src_list);
                     let clone_s_out     = Arc::clone(&share_s_out);
-                    let clone_s_in      = Arc::clone(&share_s_in);
-                    move || { 
-                        loop {
-                            thread::sleep(time::Duration::from_millis(20));
-                            let mut src_l = clone_src_list.lock().unwrap();
-                            let mut s_out = clone_s_out.lock().unwrap();
-                            match src_l.get_source_act(x){
-                                None => break,
-                                Some(_) => {
-                                    src_l.move_particle(x);
-                                    src_l.get_source_act(x).unwrap().particle_print(&mut s_out,true);
-                                    s_out.flush().unwrap();
-                                }
-                            }
-                        }
+                    move || {
+                        source_run(x, clone_src_list, clone_s_out);
                     }
                 }
             )
+            
         );
     }
     for t in threads {
@@ -58,4 +46,26 @@ fn main() {
 
 
     thread::sleep(time::Duration::from_millis(2000));
+}
+
+
+fn source_run<W: std::io::Write>(x: usize,clone_src_list: Arc<Mutex<SourceList>>,clone_s_out: Arc<Mutex<AlternateScreen<W>>>){
+    loop {
+        thread::sleep(time::Duration::from_millis(DELAY));
+        let mut src_l = clone_src_list.lock().unwrap();
+        let mut s_out = clone_s_out.lock().unwrap();
+        match src_l.get_source_act(x){
+            None => break,
+            Some(_) => {
+                if let Some((coll,pos)) = src_l.move_particle(x){
+                    coll.particle_clear(&mut s_out);
+                }
+                match src_l.check_src(x) {
+                    false => src_l.get_source_act(x).unwrap().particle_clear(&mut s_out),
+                    true => src_l.get_source_act(x).unwrap().particle_print(&mut s_out,true)
+                }
+                s_out.flush().unwrap();
+            }
+        }
+    }
 }

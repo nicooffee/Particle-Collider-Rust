@@ -15,6 +15,7 @@ pub struct GenericParticle {
 pub trait Particle {
     fn par_move(&mut self);
     fn par_print<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>,as_dir: bool);
+    fn par_clear<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>);
     fn comp_particle<T: Particle>(&self, particle: T) -> bool;
     fn par_set_pos(&mut self,pos:position::Position);
     fn turn(&mut self,dir: direction::Dir);
@@ -46,10 +47,18 @@ impl Particle for GenericParticle {
         self.pos.set_pos_x(self.pos.get_pos_x() + dir_x as i32);
         self.pos.set_pos_y(self.pos.get_pos_y() + dir_y as i32);
     }
-    fn par_print<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>,as_dir: bool){
+
+
+    fn par_clear<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>){
         let p_prev_src = self.get_prev_position();
         let p_src = self.get_position();
         srn.w_go_str(p_prev_src.get_pos_x()as u16,p_prev_src.get_pos_y()as u16,String::from(" "));
+        srn.w_go_str(p_src.get_pos_x()as u16,p_src.get_pos_y()as u16,String::from(" "));
+    }
+
+    fn par_print<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>,as_dir: bool){
+        let p_src = self.get_position();
+        self.par_clear(srn);
         srn.w_go_str(p_src.get_pos_x()as u16,p_src.get_pos_y()as u16,self.get_symbol(as_dir).to_string());
     }
     fn comp_particle<T: Particle>(&self, particle: T) -> bool {

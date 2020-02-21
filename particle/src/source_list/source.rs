@@ -60,6 +60,10 @@ impl Source {
         self.particle.par_move();
     }
 
+    pub fn particle_clear<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>){
+        self.particle.par_clear(srn);
+    }
+
     pub fn particle_print<W: std::io::Write>(&self,srn: &mut AlternateScreen<W>,as_dir: bool){
         self.particle.par_print(srn,as_dir);
     }

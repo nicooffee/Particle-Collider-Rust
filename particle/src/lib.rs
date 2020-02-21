@@ -50,29 +50,23 @@ pub mod source_list{
 
         pub fn move_particle(&mut self, id_source: usize) -> Option<(&Source,Position)> {
             if id_source < self.get_len_active(){
-                if self.list_active[id_source].get_c_particle() > 0 {
-                    let &pos = self.list_active[id_source].get_position();
-                    self.list_active[id_source].particle_move();
-                    match (self).get_collision(id_source) {
-                        Some(x) => {
+                let &pos = self.list_active[id_source].get_position();
+                self.list_active[id_source].particle_move();
+                match (self).get_collision(id_source) {
+                    Some(x) => {
+                        self.list_active[id_source].set_rand_pos();
+                        while let Some(_) = self.get_collision(id_source){
                             self.list_active[id_source].set_rand_pos();
-                            while let Some(_) = self.get_collision(id_source){
-                                self.list_active[id_source].set_rand_pos();
-                            }
-                            self.list_active[id_source].sub_particle();
+                        }
+                        self.list_active[id_source].sub_particle();
+                        self.list_active[x].set_rand_pos();
+                        while let Some(_) = self.get_collision(x){
                             self.list_active[x].set_rand_pos();
-                            while let Some(_) = self.get_collision(x){
-                                self.list_active[x].set_rand_pos();
-                            }
-                            self.list_active[x].sub_particle();
-                            Some((&self.list_active[x],pos))
-                        },
-                        None => None
-                    }
-                }
-                else{
-                    self.list_nactive.push(self.list_active.remove(id_source));
-                    None
+                        }
+                        self.list_active[x].sub_particle();
+                        Some((&self.list_active[x],pos))
+                    },
+                    None => None
                 }
             }
             else{
@@ -96,6 +90,16 @@ pub mod source_list{
         }
 
         
+        pub fn check_src(&mut self,id_source: usize) -> bool {
+            if self.list_active[id_source].get_c_particle() > 0{
+                false
+            }
+            else{
+                self.list_nactive.push(self.list_active.remove(id_source));
+                true
+            }
+        }
+        
         pub fn get_len_active(&self) -> usize {
             self.list_active.len()
         }
@@ -105,13 +109,7 @@ pub mod source_list{
 
         pub fn get_source_act(&mut self,i: usize) -> Option<&Source> {
             if self.get_len_active()>i{
-                if self.list_active[i].get_c_particle() > 0 {
-                    Some(&self.list_active[i])
-                }
-                else{
-                    self.list_nactive.push(self.list_active.remove(i));
-                    None
-                }
+                Some(&self.list_active[i])
             }
             else {
                 None
