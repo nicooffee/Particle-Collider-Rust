@@ -27,10 +27,6 @@ pub trait Particle {
     fn get_dir(&self) -> Result<direction::Dir,&str>;
 }
 
-
-
-
-
 impl GenericParticle {
     pub fn new(pos_x: i32,pos_y: i32,sym: char) -> GenericParticle {
         GenericParticle {
