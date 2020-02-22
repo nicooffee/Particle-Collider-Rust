@@ -4,23 +4,23 @@ use termion::screen::AlternateScreen;
 use std::{thread, time};
 use std::sync::{Arc, Mutex};
 use std::io::{Read, Write, stdout};
-use termion::{cursor, clear};
+use termion::{cursor, clear,color};
 use termion::raw::IntoRawMode;
 use termion::async_stdin;
 use termion_ext::AdvWrite;
 
 const CANT_SOURCE: usize      = 5;
-const CANT_PARTICLE: u32    = 10;
-const DELAY:u64 = 10;
+const CANT_PARTICLE: u32    = 1000;
+const DELAY:u64 = 1;
 
 fn main() {
     let s_in = async_stdin().bytes();
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let (max_x,max_y):(u16,u16) = termion::terminal_size().unwrap();
     write!(s_out,"{}{}",clear::All,cursor::Hide).unwrap();
-    s_out.w_box(1,2,max_x,max_y,None,None);
+    s_out.w_box(1,1,max_x,max_y,None,None);
     s_out.flush().unwrap();
-    let src_list = SourceList::new(CANT_SOURCE,CANT_PARTICLE,LimitBox::new(2,3,max_x as i32 -1,max_y as i32 -1));
+    let src_list = SourceList::new(CANT_SOURCE,CANT_PARTICLE,LimitBox::new(2,2,max_x as i32 -1,max_y as i32 -1));
     
     let share_src_list  = Arc::new(Mutex::new(src_list));
     let share_s_out     = Arc::new(Mutex::new(s_out));
@@ -51,7 +51,7 @@ fn main() {
 
 fn source_run<W: std::io::Write>(x: usize,clone_src_list: Arc<Mutex<SourceList>>,clone_s_out: Arc<Mutex<AlternateScreen<W>>>){
     loop {
-        thread::sleep(time::Duration::from_millis(DELAY));
+        thread::sleep(time::Duration::from_micros(DELAY));
         let mut src_l = clone_src_list.lock().unwrap();
         let mut s_out = clone_s_out.lock().unwrap();
         match src_l.get_source_act(x){
@@ -59,11 +59,13 @@ fn source_run<W: std::io::Write>(x: usize,clone_src_list: Arc<Mutex<SourceList>>
             Some(_) => {
                 if let Some((coll,pos)) = src_l.move_particle(x){
                     coll.particle_clear(&mut s_out);
-                    s_out.w_go_str(pos.get_pos_x()as u16,pos.get_pos_y()as u16,String::from("💥"));
+                    write!(s_out,"{}{} ",cursor::Goto(pos.get_pos_x()as u16,pos.get_pos_y()as u16),color::Fg(color::Red)).unwrap();
+                    s_out.w_go_str(pos.get_pos_x()as u16,pos.get_pos_y()as u16,String::from(" "));
+                    write!(s_out,"{}",color::Fg(color::Reset)).unwrap();
                 }
                 match src_l.check_src(x) {
                     false => if let Some(src)=src_l.get_source_act(x){src.particle_clear(&mut s_out);},
-                    true => if let Some(src)=src_l.get_source_act(x){src.particle_print(&mut s_out,true);}
+                    true => if let Some(src)=src_l.get_source_act(x){src.particle_print(&mut s_out,false);}
                 }
                 s_out.flush().unwrap();
             }

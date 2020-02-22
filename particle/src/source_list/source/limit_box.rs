@@ -1,5 +1,6 @@
 pub mod limit;
 use rand::distributions::{Distribution, Uniform};
+
 #[derive(Copy,Clone)]
 pub struct LimitBox {
     lim_min: limit::Limit,
@@ -58,8 +59,9 @@ impl LimitBox {
 
     pub fn get_rand_cord(&self) -> (i32,i32){
         let mut rng = rand::thread_rng();
-        let un_x = Uniform::from(self.lim_min.get_x()..=self.lim_max.get_x());
-        let un_y = Uniform::from(self.lim_min.get_y()..=self.lim_max.get_y());
+        let un_x = Uniform::new(self.lim_min.get_x()+1,self.lim_max.get_x()-1);
+        let un_y = Uniform::new(self.lim_min.get_y()+1,self.lim_max.get_y()-1);
+        
         (
             un_x.sample(&mut rng),
             un_y.sample(&mut rng)

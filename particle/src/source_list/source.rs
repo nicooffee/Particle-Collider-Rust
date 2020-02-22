@@ -41,16 +41,16 @@ impl Source {
         match self.limits.area_point(par_aux.get_pos_x(),par_aux.get_pos_y()).unwrap(){
             Area::Inside => (),
             Area::OutSide1 => self.particle.change_to(
-                match die.sample(&mut rng){0=> Dir::D135, 1=> Dir::D180,  2=>Dir::D225,_ => Dir::D180}
+                match die.sample(&mut rng){0=> Dir::D135, 1=> Dir::D180,  2=>Dir::D225,_ => panic!("awas")}
             ),
             Area::OutSide2 => self.particle.change_to(
-                match die.sample(&mut rng){0=> Dir::D225, 1=> Dir::D270,  2=>Dir::D315,_ => Dir::D90}
+                match die.sample(&mut rng){0=> Dir::D225, 1=> Dir::D270,  2=>Dir::D315,_ => panic!("awas")}
             ), 
             Area::OutSide3 => self.particle.change_to(
-                match die.sample(&mut rng){0=> Dir::D45, 1=> Dir::D0,  2=>Dir::D315,_ => Dir::D0}
+                match die.sample(&mut rng){0=> Dir::D45, 1=> Dir::D0,  2=>Dir::D315,_ => panic!("awas")}
             ),
             Area::OutSide4 => self.particle.change_to(
-                match die.sample(&mut rng){0=> Dir::D135, 1=> Dir::D90,  2=>Dir::D45,_ => Dir::D90}
+                match die.sample(&mut rng){0=> Dir::D135, 1=> Dir::D90,  2=>Dir::D45,_ => panic!("awas")}
             ),
             Area::OutCorner1 => self.particle.change_to(Dir::D225),
             Area::OutCorner2 => self.particle.change_to(Dir::D315),
