@@ -92,11 +92,11 @@ pub mod source_list{
         
         pub fn check_src(&mut self,id_source: usize) -> bool {
             if self.list_active[id_source].get_c_particle() > 0{
-                false
+                true
             }
             else{
                 self.list_nactive.push(self.list_active.remove(id_source));
-                true
+                false
             }
         }
         

@@ -10,8 +10,8 @@ use termion::async_stdin;
 use termion_ext::AdvWrite;
 
 const CANT_SOURCE: usize      = 5;
-const CANT_PARTICLE: u32    = 2;
-const DELAY:u64 = 20;
+const CANT_PARTICLE: u32    = 10;
+const DELAY:u64 = 10;
 
 fn main() {
     let s_in = async_stdin().bytes();
@@ -59,10 +59,11 @@ fn source_run<W: std::io::Write>(x: usize,clone_src_list: Arc<Mutex<SourceList>>
             Some(_) => {
                 if let Some((coll,pos)) = src_l.move_particle(x){
                     coll.particle_clear(&mut s_out);
+                    s_out.w_go_str(pos.get_pos_x()as u16,pos.get_pos_y()as u16,String::from("💥"));
                 }
                 match src_l.check_src(x) {
-                    false => src_l.get_source_act(x).unwrap().particle_clear(&mut s_out),
-                    true => src_l.get_source_act(x).unwrap().particle_print(&mut s_out,true)
+                    false => if let Some(src)=src_l.get_source_act(x){src.particle_clear(&mut s_out);},
+                    true => if let Some(src)=src_l.get_source_act(x){src.particle_print(&mut s_out,true);}
                 }
                 s_out.flush().unwrap();
             }
