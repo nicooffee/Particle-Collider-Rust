@@ -11,9 +11,9 @@ use termion::input::TermRead;
 use termion_ext::AdvWrite;
 use std::sync::mpsc::channel;
 
-const CANT_SOURCE: usize      = 20;
-const CANT_PARTICLE: u32    = 1000;
-const DELAY:u64 = 10000;
+const CANT_SOURCE: usize      = 10;
+const CANT_PARTICLE: u32    = 100;
+const DELAY:u64 = 100;
 fn main() {
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let (limits_info,limits_srce) = initialize_window(&mut s_out);
@@ -72,7 +72,6 @@ fn source_run<W: std::io::Write>(
                     false => if let Some(src)=src_l.get_source_act(x){src.particle_clear(&mut s_out);},
                     true => if let Some(src)=src_l.get_source_act(x){src.particle_print(&mut s_out,false);}
                 }
-                s_out.flush().unwrap();
             }
         }
     }
@@ -83,6 +82,8 @@ fn info_run<W: std::io::Write>(
     clone_s_out: Arc<Mutex<AlternateScreen<W>>>,
     limits: LimitBox,
     exit_msg: std::sync::mpsc::Receiver<bool>){
+    let max_l_bar:u16 = 40;
+    let max_string = (0..max_l_bar).map(|_| "|").collect::<String>();
     loop {
         match exit_msg.try_recv() {Ok(_b) => break, _ => ()};
         thread::sleep(time::Duration::from_micros(DELAY));
@@ -90,8 +91,9 @@ fn info_run<W: std::io::Write>(
         let mut s_out = clone_s_out.lock().unwrap();
         for i in 0..src_l.get_len_active(){
             if let Some(src) = src_l.get_source_act(i){
+                let pos_y:u16 = i as u16 + 2;
                 if let Ok(_) = write!(s_out,"{}P {:2}-{}: {:5} | {} | ({:3},{:3})",
-                    cursor::Goto(limits.get_min_x() as u16,i as u16+2),
+                    cursor::Goto(limits.get_min_x() as u16,pos_y),
                     i,
                     src.get_id(),
                     src.get_c_particle(),
@@ -99,9 +101,31 @@ fn info_run<W: std::io::Write>(
                     src.get_position().get_pos_x(),
                     src.get_position().get_pos_y()
                 ){};
+                let percent = src.get_c_particle() as f32/CANT_PARTICLE as f32;
+                let lim_max = (percent*(max_l_bar-6) as f32) as usize ;
+                if let Ok(_) = write!(s_out,"{}{}{:3.1}% {}{} {}",
+                    cursor::Goto(limits.get_max_x() as u16-(max_l_bar),pos_y ),
+                    color::Fg(get_bar_color(percent*100.0)),
+                    percent*100.0,
+                    cursor::Goto(limits.get_max_x() as u16-(max_l_bar) + 6,pos_y),
+                    &max_string[0..lim_max],
+                    color::Fg(color::Reset)
+                ){};
             }
         }
+        s_out.w_line_h(limits.get_min_x()as u16,(src_l.get_len_active()+2) as u16,(limits.get_max_x()-limits.get_min_x()) as u16,' ');
+        s_out.flush().unwrap();
     }        
+}
+fn get_bar_color(l_bar: f32) -> color::Rgb{
+    match l_bar as u32 {
+        96..=100 => color::Rgb(0,255,255),
+        86..=95 => color::Rgb(0,255,0),
+        51..=85 => color::Rgb(255,255,0),
+        25..=50 => color::Rgb(255, 165, 0),
+        _ => color::Rgb(255,0,0)
+
+    }
 }
 
 fn exit_run(senders: Vec<std::sync::mpsc::Sender<bool>>){
@@ -136,3 +160,4 @@ fn initialize_window<W: std::io::Write>(s_out: &mut AlternateScreen<W>) -> (Limi
     s_out.flush().unwrap();
     (limits_info,limits_srce)
 }
+
