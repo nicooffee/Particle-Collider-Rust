@@ -13,7 +13,7 @@ use std::sync::mpsc::channel;
 
 const CANT_SOURCE: usize      = 5;
 const CANT_PARTICLE: u32    = 1000;
-const DELAY:u64 = 1;
+const DELAY:u64 = 30000;
 
 fn main() {
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
@@ -79,7 +79,7 @@ fn source_run<W: std::io::Write>(
                 if let Some((coll,pos)) = src_l.move_particle(x){
                     coll.particle_clear(&mut s_out);
                     write!(s_out,"{}{} ",cursor::Goto(pos.get_pos_x()as u16,pos.get_pos_y()as u16),color::Fg(color::Red)).unwrap();
-                    s_out.w_go_str(pos.get_pos_x()as u16,pos.get_pos_y()as u16,String::from(" "));
+                    s_out.w_go_str(pos.get_pos_x()as u16,pos.get_pos_y()as u16,String::from("X"));
                     write!(s_out,"{}",color::Fg(color::Reset)).unwrap();
                 }
                 match src_l.check_src(x) {
