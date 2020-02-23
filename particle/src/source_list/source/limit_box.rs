@@ -57,6 +57,19 @@ impl LimitBox {
         self.lim_max
     }
 
+    pub fn get_min_x(&self) -> i32 {
+        self.lim_min.get_x()
+    }
+    pub fn get_min_y(&self) -> i32 {
+        self.lim_min.get_y()
+    }
+    pub fn get_max_x(&self) -> i32 {
+        self.lim_max.get_x()
+    }
+    pub fn get_max_y(&self) -> i32 {
+        self.lim_max.get_y()
+    }
+
     pub fn get_rand_cord(&self) -> (i32,i32){
         let mut rng = rand::thread_rng();
         let un_x = Uniform::new(self.lim_min.get_x()+1,self.lim_max.get_x()-1);
