@@ -31,7 +31,7 @@ fn main() {
                     let clone_s_out     = Arc::clone(&share_s_out);
                     move || {
                         source_run(x, clone_src_list, clone_s_out,reciever);
-        }}));    
+        }}));
     }
     let (sender,reciever) = channel();
     senders.push(sender);
@@ -82,7 +82,7 @@ fn info_run<W: std::io::Write>(
     clone_s_out: Arc<Mutex<AlternateScreen<W>>>,
     limits: LimitBox,
     exit_msg: std::sync::mpsc::Receiver<bool>){
-    let max_l_bar:u16 = 40;
+    let max_l_bar:u16 = 35;
     let max_string = (0..max_l_bar).map(|_| "|").collect::<String>();
     loop {
         match exit_msg.try_recv() {Ok(_b) => break, _ => ()};
@@ -150,7 +150,7 @@ fn exit_run(senders: Vec<std::sync::mpsc::Sender<bool>>){
 
 fn initialize_window<W: std::io::Write>(s_out: &mut AlternateScreen<W>) -> (LimitBox,LimitBox){
     let (max_x,max_y):(u16,u16) = termion::terminal_size().unwrap();
-    let (min_bi_x,min_bi_y,max_bi_x,max_bi_y) = (1,1,max_x/2,max_y);
+    let (min_bi_x,min_bi_y,max_bi_x,max_bi_y) = (1,1,max_x*40/100,max_y);
     let (min_bs_x,min_bs_y,max_bs_x,max_bs_y) = (max_bi_x+1,1,max_x,max_y);
     let limits_info = LimitBox::new(min_bi_x+1 ,min_bi_y+1,(max_bi_x as i32)-1 ,(max_bi_y as i32)-1);
     let limits_srce = LimitBox::new((min_bs_x as i32)+1,min_bs_y+1,(max_bs_x as i32)-1,(max_bs_y as i32)-1);
