@@ -103,4 +103,11 @@ impl Source {
     pub fn get_c_particle(&self) -> u32 {
         self.c_particle
     }
+
+    pub fn get_min_x(&self) -> i32{
+        self.limits.get_min_x()
+    }
+    pub fn get_min_y(&self) -> i32{
+        self.limits.get_min_y()
+    }
 }
