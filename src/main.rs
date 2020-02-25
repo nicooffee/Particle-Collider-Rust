@@ -11,19 +11,18 @@ use termion::input::TermRead;
 use termion_ext::AdvWrite;
 use std::sync::mpsc::channel;
 
-const CANT_SOURCE: usize      = 10;
-const CANT_PARTICLE: u32    = 100;
-const DELAY:u64 = 100;
+const CANT_SOURCE: usize      = 15;
+const CANT_PARTICLE: u32    = 10000;
+const DELAY:u64 = 10;
 fn main() {
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let (limits_info,limits_srce,limits_heat) = initialize_window(&mut s_out);
     let src_list = SourceList::new(CANT_SOURCE,CANT_PARTICLE,limits_srce);
-    let heat_m = vec![vec![0;(limits_heat.get_max_y()-limits_heat.get_min_y()+1) as usize];(limits_heat.get_max_x()-limits_heat.get_min_x()+1) as usize];
     let share_src_list  = Arc::new(Mutex::new(src_list));
     let share_s_out     = Arc::new(Mutex::new(s_out));
-    let share_heat_m    = Arc::new(Mutex::new(heat_m));
-     let mut threads = vec![];
+    let mut threads = vec![];
     let mut senders = vec![];
+    let (sender_heat,reciever_heat) = channel();
     for x in 0..CANT_SOURCE + 1 {
         let (sender,reciever) = channel();
         senders.push(sender);
@@ -31,30 +30,29 @@ fn main() {
                 thread::spawn({
                     let clone_src_list  = Arc::clone(&share_src_list);
                     let clone_s_out     = Arc::clone(&share_s_out);
-                    let clone_heat_m  = Arc::clone(&share_heat_m);
+                    let sender_heat_clone = sender_heat.clone();
                     move || {
-                        source_run(x, clone_src_list, clone_s_out,clone_heat_m,reciever);
+                        source_run(x, clone_src_list, clone_s_out,sender_heat_clone,reciever);
         }}));
     }
-    let (sender,reciever) = channel();
-    senders.push(sender);
+    let (sender_info,reciever_info) = channel();
+    senders.push(sender_info);
+    let (sender_heat_exit,reciever_heat_exit) = channel();
+    senders.push(sender_heat_exit);
+    threads.push(thread::spawn({
+        let clone_s_out   = Arc::clone(&share_s_out);
+        move || {
+            heat_map_run(limits_heat, clone_s_out, reciever_heat,reciever_heat_exit)
+    }}));
     threads.push(thread::spawn({
         let clone_src_list  = Arc::clone(&share_src_list);
         let clone_s_out     = Arc::clone(&share_s_out);
         move || {
-            info_run(clone_src_list,clone_s_out,limits_info,reciever);
-    }}));
-    let (sender,reciever) = channel();
-    senders.push(sender);
-    threads.push(thread::spawn({
-        let clone_heat_m  = Arc::clone(&share_heat_m);
-        let clone_s_out   = Arc::clone(&share_s_out);
-        move || {
-            heat_map_run(limits_heat.get_min_x(),limits_heat.get_min_y(), clone_s_out, clone_heat_m, reciever)
+            info_run(clone_src_list,clone_s_out,limits_info,reciever_info);
     }}));
 
     threads.push(thread::spawn(move || {
-        exit_run(senders);
+        exit_run(senders,sender_heat.clone());
     }));
     for t in threads {
         t.join().unwrap();
@@ -65,13 +63,13 @@ fn source_run<W: std::io::Write>(
     x: usize,
     clone_src_list: Arc<Mutex<SourceList>>,
     clone_s_out: Arc<Mutex<AlternateScreen<W>>>,
-    clone_heat_m: Arc<Mutex<Vec<Vec<i32>>>>,
+    send_pos_heat: std::sync::mpsc::Sender<Option<(usize,usize)>>,
     exit_msg: std::sync::mpsc::Receiver<bool>){
     loop {
         match exit_msg.try_recv() {Ok(_b) => break, _ => ()};
         thread::sleep(time::Duration::from_micros(DELAY));
-        let mut src_l = clone_src_list.lock().unwrap();
         let mut s_out = clone_s_out.lock().unwrap();
+        let mut src_l = clone_src_list.lock().unwrap();
         match src_l.get_source_act(x){
             None => break,
             Some(_) => {
@@ -82,10 +80,9 @@ fn source_run<W: std::io::Write>(
                     write!(s_out,"{}{} ",cursor::Goto(pos.get_pos_x()as u16,pos.get_pos_y()as u16),color::Fg(color::Red)).unwrap();
                     s_out.w_go_str(pos.get_pos_x()as u16,pos.get_pos_y()as u16,String::from("X"));
                     write!(s_out,"{}",color::Fg(color::Reset)).unwrap();
-                    let mut heat_m = clone_heat_m.lock().unwrap();
                     let tr_x:usize = (pos.get_pos_x() - min_x) as usize;
                     let tr_y:usize = (pos.get_pos_y() - min_y) as usize;
-                    heat_m[tr_y][tr_x] = heat_m[tr_y][tr_x] + 1 ; 
+                    send_pos_heat.send(Some((tr_x,tr_y))).unwrap();
                 }
                 match src_l.check_src(x) {
                     false => if let Some(src)=src_l.get_source_act(x){src.particle_clear(&mut s_out);},
@@ -106,8 +103,8 @@ fn info_run<W: std::io::Write>(
     loop {
         match exit_msg.try_recv() {Ok(_b) => break, _ => ()};
         thread::sleep(time::Duration::from_micros(DELAY));
-        let mut src_l = clone_src_list.lock().unwrap();
         let mut s_out = clone_s_out.lock().unwrap();
+        let mut src_l = clone_src_list.lock().unwrap();
         for i in 0..src_l.get_len_active(){
             if let Some(src) = src_l.get_source_act(i){
                 let pos_y:u16 = i as u16 + 2;
@@ -148,29 +145,31 @@ fn get_bar_color(l_bar: f32) -> color::Rgb{
 }
 
 fn heat_map_run<W: std::io::Write>(
-    tr_x: i32,
-    tr_y: i32,
+    limits_heat: LimitBox,
     clone_s_out: Arc<Mutex<AlternateScreen<W>>>,
-    clone_heat_m: Arc<Mutex<Vec<Vec<i32>>>>,
+    pos_rec: std::sync::mpsc::Receiver<Option<(usize,usize)>>,
     exit_msg: std::sync::mpsc::Receiver<bool>){
+    let mut heat_m = vec![vec![0;(limits_heat.get_max_y()-limits_heat.get_min_y()+1) as usize];(limits_heat.get_max_x()-limits_heat.get_min_x()+1) as usize];
+    let mut max_col = 1;
     loop {
         match exit_msg.try_recv() {Ok(_b) => break, _ => ()};
         thread::sleep(time::Duration::from_micros(DELAY));
-        let heat_m  = clone_heat_m.lock().unwrap();
-        for i in 0..heat_m.len(){
-            for j in 0..heat_m[i].len(){
-                if heat_m[i][j] > 0 {
-                    let grd:u8 = if heat_m[i][j]> 255 {255} else {heat_m[i][j] as u8};
-                    let mut s_out   = clone_s_out.lock().unwrap();
-                    s_out.w_go_str_color(tr_x as u16+i as u16,tr_y as u16+j as u16," ".to_string(),color::Reset,color::Rgb(grd,grd,grd));
-                }
-            }
+        if let Some((x,y)) = pos_rec.recv().unwrap(){
+            let mut s_out   = clone_s_out.lock().unwrap();
+            heat_m[x][y] = heat_m[x][y] + 1;
+            if heat_m[x][y]>= max_col {max_col = heat_m[x][y];}
+            let v = ((heat_m[x][y] as f32/max_col as f32) * 255 as f32 ) as u8;
+            let (r,g,b):(u8,u8,u8) = (0,v,v);
+            s_out.w_go_str_color(limits_heat.get_min_x() as u16+x as u16,limits_heat.get_min_y() as u16+y as u16," ".to_string(),color::Reset,color::Rgb(r,g,b));
         }
+        
     }
     
 }
 
-fn exit_run(senders: Vec<std::sync::mpsc::Sender<bool>>){
+fn exit_run(
+    senders: Vec<std::sync::mpsc::Sender<bool>>,
+    unlock_heat_run: std::sync::mpsc::Sender<Option<(usize,usize)>>){
     let mut b_flag = false;
     loop{
         let s_in = stdin();
@@ -180,6 +179,7 @@ fn exit_run(senders: Vec<std::sync::mpsc::Sender<bool>>){
                     for i in 0..senders.len(){
                         if let Ok(_) = senders[i].send(true){}
                     }
+                    if let Ok(_) = unlock_heat_run.send(None){}
                     b_flag = true;
                     break;
                 },
