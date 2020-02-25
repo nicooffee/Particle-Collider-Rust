@@ -1,7 +1,6 @@
 pub mod particle;
 pub mod limit_box;
 use limit_box::Area;
-use particle::Particle;
 use particle::direction::Dir;
 use rand::distributions::{Distribution, Uniform};
 use termion::screen::AlternateScreen;
