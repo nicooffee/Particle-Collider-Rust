@@ -86,7 +86,7 @@ fn source_run<W: std::io::Write>(
                 }
                 match src_l.check_src(x) {
                     false => if let Some(src)=src_l.get_source_act(x){src.particle_clear(&mut s_out);},
-                    true => if let Some(src)=src_l.get_source_act(x){src.particle_print(&mut s_out,false);}
+                    true => if let Some(src)=src_l.get_source_act(x){src.particle_print(&mut s_out,true);}
                 }
             }
         }
@@ -114,8 +114,8 @@ fn info_run<W: std::io::Write>(
                     src.get_id(),
                     src.get_c_particle(),
                     src.get_symbol(true),
-                    src.get_position().get_pos_x(),
-                    src.get_position().get_pos_y()
+                    src.get_position().get_pos_x()-src.get_min_x()+1,
+                    src.get_position().get_pos_y()-src.get_min_y()+1
                 ){};
                 let percent = src.get_c_particle() as f32/CANT_PARTICLE as f32;
                 let lim_max = (percent*(max_l_bar-6) as f32) as usize ;
@@ -158,13 +158,21 @@ fn heat_map_run<W: std::io::Write>(
             let mut s_out   = clone_s_out.lock().unwrap();
             heat_m[x][y] = heat_m[x][y] + 1;
             if heat_m[x][y]>= max_col {max_col = heat_m[x][y];}
-            let v = ((heat_m[x][y] as f32/max_col as f32) * 255 as f32 ) as u8;
-            let (r,g,b):(u8,u8,u8) = (0,v,v);
+            let (r,g,b):(u8,u8,u8) = get_heat(heat_m[x][y],max_col);
             s_out.w_go_str_color(limits_heat.get_min_x() as u16+x as u16,limits_heat.get_min_y() as u16+y as u16," ".to_string(),color::Reset,color::Rgb(r,g,b));
-        }
-        
+        } 
     }
-    
+}
+
+fn get_heat(c_val: i32, max_val: i32) -> (u8,u8,u8){
+
+    let grd = ((c_val as f32 / max_val as f32) * 1020.0) as u32;
+    match grd {
+        766..=1020  => (255,(1020-grd) as u8,0),
+        511..=765   => ((grd - 510) as u8,255,0),
+        256..=510   => (0,255,(510-grd) as u8),
+        _           => (0,0,grd as u8),
+    }    
 }
 
 fn exit_run(
