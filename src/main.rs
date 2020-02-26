@@ -11,9 +11,9 @@ use termion::input::TermRead;
 use termion_ext::AdvWrite;
 use std::sync::mpsc::channel;
 
-const CANT_SOURCE: usize      = 15;
+const CANT_SOURCE: usize      = 5;
 const CANT_PARTICLE: u32    = 10000;
-const DELAY:u64 = 10;
+const DELAY:u64 = 10000;
 fn main() {
     let mut s_out = AlternateScreen::from(stdout().into_raw_mode().unwrap());
     let (limits_info,limits_srce,limits_heat) = initialize_window(&mut s_out);
@@ -150,14 +150,21 @@ fn heat_map_run<W: std::io::Write>(
     pos_rec: std::sync::mpsc::Receiver<Option<(usize,usize)>>,
     exit_msg: std::sync::mpsc::Receiver<bool>){
     let mut heat_m = vec![vec![0;(limits_heat.get_max_y()-limits_heat.get_min_y()+1) as usize];(limits_heat.get_max_x()-limits_heat.get_min_x()+1) as usize];
-    let mut max_col = 1;
+    let mut max_col = 0;
     loop {
         match exit_msg.try_recv() {Ok(_b) => break, _ => ()};
         thread::sleep(time::Duration::from_micros(DELAY));
         if let Some((x,y)) = pos_rec.recv().unwrap(){
             let mut s_out   = clone_s_out.lock().unwrap();
             heat_m[x][y] = heat_m[x][y] + 1;
-            if heat_m[x][y]>= max_col {max_col = heat_m[x][y];}
+            if heat_m[x][y]> max_col {max_col = heat_m[x][y];
+                for i in 0..heat_m.len(){
+                    for j in 0..heat_m[i].len(){
+                        let (r,g,b):(u8,u8,u8) = get_heat(heat_m[i][j],max_col);
+                        s_out.w_go_str_color(limits_heat.get_min_x() as u16+i as u16,limits_heat.get_min_y() as u16+j as u16," ".to_string(),color::Reset,color::Rgb(r,g,b));
+                    }
+                }
+            }
             let (r,g,b):(u8,u8,u8) = get_heat(heat_m[x][y],max_col);
             s_out.w_go_str_color(limits_heat.get_min_x() as u16+x as u16,limits_heat.get_min_y() as u16+y as u16," ".to_string(),color::Reset,color::Rgb(r,g,b));
         } 
@@ -165,13 +172,12 @@ fn heat_map_run<W: std::io::Write>(
 }
 
 fn get_heat(c_val: i32, max_val: i32) -> (u8,u8,u8){
-
     let grd = ((c_val as f32 / max_val as f32) * 1020.0) as u32;
     match grd {
         766..=1020  => (255,(1020-grd) as u8,0),
         511..=765   => ((grd - 510) as u8,255,0),
         256..=510   => (0,255,(510-grd) as u8),
-        _           => (0,0,grd as u8),
+        _           => (0,grd as u8,255),
     }    
 }
 
